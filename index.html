@@ -94,26 +94,38 @@
   #invite-screen {
     position: fixed; inset: 0; display: none;
     flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(circle at 50% 30%, #fff3b0 0%, #ffd60a 55%, #ffb703 100%);
-    color: #5a3e00; text-align: center; padding: 24px; overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255,243,176,.55) 0%, rgba(255,214,10,0) 45%),
+      linear-gradient(180deg, #bdf28a 0%, #5fb83a 38%, #2f7d22 72%, #1c5417 100%);
+    color: #2a3d10; text-align: center; padding: 24px; overflow: hidden;
   }
   #invite-screen.show { display: flex; animation: pop .6s cubic-bezier(.2,1.2,.4,1); }
   @keyframes pop { 0% { transform: scale(.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  /* jungle foliage framing (behind mangoes/monkeys) */
+  .jungle { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .jungle span { position: absolute; line-height: 1; filter: drop-shadow(0 3px 4px rgba(0,0,0,.25)); }
+  .jungle .tree { bottom: -14px; font-size: 130px; }
+  .jungle .leaf { top: -22px; font-size: 78px; }
+  @media (max-width: 520px) {
+    .jungle .tree { font-size: 84px; }
+    .jungle .leaf { font-size: 52px; }
+  }
 
   #mangocanvas { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
 
   .invite-card { position: relative; z-index: 3; max-width: 440px; }
   .invite-card .dino { font-size: 56px; }
-  .invite-card .kicker { font-size: 15px; letter-spacing: 4px; text-transform: uppercase; color:#b56a00; margin-top: 4px; }
+  .invite-card .kicker { font-size: 15px; letter-spacing: 4px; text-transform: uppercase; color:#fff7d6; margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
   .invite-card h1 {
     font-size: 58px; line-height: 1; margin: 6px 0 2px;
     color: #c1121f; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,.12);
     letter-spacing: 1px;
   }
-  .invite-card .name { font-size: 30px; font-weight: 800; color:#7b2cbf; margin-bottom: 14px; }
+  .invite-card .name { font-size: 30px; font-weight: 800; color:#fff; margin-bottom: 14px; text-shadow: 0 2px 6px rgba(0,0,0,.5); }
 
-  .details { display:inline-block; background: rgba(255,255,255,.55); border: 2px dashed #c1121f;
-    border-radius: 14px; padding: 16px 22px; backdrop-filter: blur(2px); }
+  .details { display:inline-block; background: rgba(255,255,255,.88); border: 2px dashed #1c5417;
+    border-radius: 14px; padding: 16px 22px; backdrop-filter: blur(2px); box-shadow: 0 10px 30px rgba(0,0,0,.3); }
   .row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; margin: 8px 0; color:#5a3e00; }
   .row .ico { font-size: 20px; }
   .row b { color:#3a2a00; }
@@ -164,6 +176,17 @@
 
   <!-- ===================== INVITE ===================== -->
   <div id="invite-screen">
+    <div class="jungle">
+      <span class="leaf" style="left:-12px; transform:rotate(18deg)">🌿</span>
+      <span class="leaf" style="left:13%; font-size:54px; transform:rotate(-14deg)">🍃</span>
+      <span class="leaf" style="left:34%; font-size:46px; transform:rotate(8deg)">🍃</span>
+      <span class="leaf" style="right:-10px; transform:rotate(-22deg) scaleX(-1)">🌿</span>
+      <span class="leaf" style="right:15%; font-size:54px; transform:rotate(16deg) scaleX(-1)">🍃</span>
+      <span class="tree" style="left:-26px">🌴</span>
+      <span class="tree" style="left:20%; font-size:96px">🌴</span>
+      <span class="tree" style="right:-26px; transform:scaleX(-1)">🌴</span>
+      <span class="tree" style="right:22%; font-size:96px; transform:scaleX(-1)">🌴</span>
+    </div>
     <canvas id="mangocanvas"></canvas>
     <canvas id="confetti"></canvas>
     <div class="invite-card">
