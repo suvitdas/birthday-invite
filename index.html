@@ -80,7 +80,8 @@
     box-shadow: 0 20px 50px rgba(0,0,0,.5); touch-action: manipulation; display: block;
     width: min(760px, 94vw); height: clamp(150px, 34vh, 240px);
   }
-  .controls { margin-top: 12px; font-size: 13px; color: #c9b8e0; }
+  .controls { margin-top: 12px; font-size: 14px; line-height: 1.7; color: #e8def7; }
+  .controls b { color: #ffd166; }
   .overlay-msg { margin-top: 10px; font-size: 15px; min-height: 22px; color: #ffd166; font-weight: 600; }
 
   @media (max-width: 520px) {
@@ -116,7 +117,12 @@
 
   .invite-card { position: relative; z-index: 3; max-width: 440px; }
   .invite-card .dino { font-size: 56px; }
-  .invite-card .kicker { font-size: 15px; letter-spacing: 4px; text-transform: uppercase; color:#fff7d6; margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
+  .invite-card .kicker {
+    position: relative; z-index: 5; display: inline-block;
+    font-size: 15px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+    color: #000; margin-top: 4px; padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.85); box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  }
   .invite-card h1 {
     font-size: 58px; line-height: 1; margin: 6px 0 2px;
     color: #c1121f; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,.12);
@@ -171,7 +177,7 @@
 
     <canvas id="game" width="760" height="240"></canvas>
     <div class="overlay-msg" id="msg">Press SPACE / tap to jump</div>
-    <div class="controls">Space · ↑ · or tap the game to jump</div>
+    <div class="controls">📱 <b>On your phone? TAP the white area above to make the dino jump!</b><br>💻 On a computer: press <b>Space</b> or <b>↑</b></div>
   </div>
 
   <!-- ===================== INVITE ===================== -->
@@ -234,21 +240,21 @@ let dino, obstacles, dist, speed, gravity, running, won, spawnTimer;
 let startTime, elapsed, lastSpeedSec, finaleSpawned;
 const FINALE_AT = 55;            // seconds — when the 6 giant cacti appear
 const MAX_ATTEMPTS = 5;          // tries before "invited anyway"
-let attemptsLeft, gameWon;
+let attemptsLeft, gameWon, showHint;
 
 function reset() {
   dino = { x: 60, y: GROUND, w: 30, h: 34, vy: 0, onGround: true };
   obstacles = [];
   dist = 0; speed = BASE_SPEED; gravity = 0.7;
   running = true; won = false; spawnTimer = 60;
-  startTime = null; elapsed = 0; lastSpeedSec = 0; finaleSpawned = false;
-  msg.textContent = `Survive 60 seconds! 🏃  (${attemptsLeft} ${attemptsLeft===1?'try':'tries'} left)`;
+  startTime = null; elapsed = 0; lastSpeedSec = 0; finaleSpawned = false; showHint = true;
+  msg.textContent = `👆 TAP the white area to jump!  ·  ${attemptsLeft} ${attemptsLeft===1?'try':'tries'} left`;
 }
 
 function jump() {
   if (won) return;
   if (!running) { reset(); loop(); return; }   // restart after game over
-  if (dino.onGround) { dino.vy = -13; dino.onGround = false; }
+  if (dino.onGround) { dino.vy = -13; dino.onGround = false; showHint = false; }
 }
 
 function spawnObstacle() {
@@ -303,6 +309,19 @@ function draw() {
     g.font = (o.big ? '50px' : o.h > 40 ? '40px' : '28px') + ' serif';
     g.fillText(o.emoji, o.x, o.y + 4);
   });
+
+  // tap-to-jump hint (shown until the first jump)
+  if (showHint) {
+    g.save();
+    g.textAlign = 'center';
+    g.fillStyle = 'rgba(120,115,245,0.95)';
+    g.font = 'bold ' + Math.round(Math.max(16, Math.min(W,560)/20)) + 'px "Segoe UI", sans-serif';
+    g.fillText('👆 TAP / CLICK ANYWHERE HERE TO JUMP', W/2, H*0.42);
+    g.font = Math.round(Math.max(13, Math.min(W,560)/30)) + 'px "Segoe UI", sans-serif';
+    g.fillStyle = 'rgba(90,74,109,0.9)';
+    g.fillText('jump the cacti to unlock your invite', W/2, H*0.42 + 26);
+    g.restore();
+  }
 }
 
 function loop() {
