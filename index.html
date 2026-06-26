@@ -435,7 +435,7 @@ function mcsize(){ MW = mc.width = innerWidth; MH = mc.height = innerHeight; }
 function startMangoSim(){
   mcsize();
   mangoes = []; monkeys = []; mangoSpawnT = 0; ate = 0;
-  const n = 3;                                  // number of hungry monkeys
+  const n = 7;                                  // number of hungry monkeys
   for (let i = 0; i < n; i++)
     monkeys.push({ x: (i+1)*MW/(n+1), face: 1, target: null, chomp: 0 });
   mangoRunning = true;
