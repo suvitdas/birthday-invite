@@ -54,7 +54,9 @@
   .cover-front .emoji { font-size:78px; animation: bob 2.4s ease-in-out infinite; }
   @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
   .cover-front h2 { font-size:30px; margin-top:14px; letter-spacing:1px; text-shadow:0 2px 8px rgba(0,0,0,.25); }
-  .cover-front .tap { margin-top:22px; font-size:14px; opacity:.9; padding:8px 16px;
+  .cover-front .invite-line { margin-top:10px; font-size:16px; font-style:italic;
+    color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.3); letter-spacing:.5px; }
+  .cover-front .tap { margin-top:18px; font-size:14px; opacity:.9; padding:8px 16px;
     border:1px solid rgba(255,255,255,.6); border-radius:999px; animation: pulse 1.8s infinite; }
   @keyframes pulse { 0%,100%{opacity:.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.05);} }
   @media (max-width:420px){ .scene{width:300px;height:410px;} }
@@ -158,6 +160,7 @@
         <div class="cover-face cover-front">
           <div class="emoji">🎂</div>
           <h2>Happy Birthday!</h2>
+          <div class="invite-line">…if you want to be invited 🎉</div>
           <div class="tap">👆 Tap to open</div>
         </div>
         <div class="cover-face cover-back">✦ ✦ ✦</div>
