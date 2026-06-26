@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>You're Invited! 🦖🥭</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #1a0b2e; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; min-height: 100dvh;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+
+  /* ===================== CARD (intro) SCREEN ===================== */
+  #card-screen {
+    position: fixed; inset: 0; z-index: 6;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 40%, #4a2c6d 100%);
+    perspective: 1600px; overflow: hidden;
+  }
+  .balloons { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .balloon { position: absolute; bottom: -160px; width: 54px; height: 68px;
+    border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%; opacity:.8; animation: float linear infinite; }
+  .balloon::after { content:""; position:absolute; bottom:-38px; left:50%;
+    width:1px; height:38px; background:rgba(255,255,255,.4); transform:translateX(-50%); }
+  @keyframes float { 0%{transform:translateY(0) rotate(0);} 100%{transform:translateY(-115vh) rotate(20deg);} }
+
+  .scene { position: relative; z-index: 2; width: 340px; height: 460px; perspective: 1600px; }
+  .scene .inside-card {
+    position:absolute; inset:0; border-radius:16px; background:#fffdf7; color:#3a2a4d;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px; box-shadow:0 30px 60px rgba(0,0,0,.5);
+  }
+  .scene .inside-card .big { font-size:60px; }
+  .scene .inside-card h3 { font-size:24px; margin-top:10px; color:#7873f5; }
+  .scene .inside-card p { font-size:14px; color:#7a6a8d; margin-top:8px; }
+  .cover {
+    position:absolute; inset:0; border-radius:16px; transform-origin:left center;
+    transform-style:preserve-3d; transition:transform 1.2s cubic-bezier(.3,.8,.3,1);
+    cursor:pointer; z-index:3; box-shadow:0 30px 60px rgba(0,0,0,.5);
+  }
+  .scene.open .cover { transform: rotateY(-165deg); }
+  .cover-face { position:absolute; inset:0; border-radius:16px; backface-visibility:hidden;
+    overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:30px; }
+  .cover-front { background: linear-gradient(160deg,#ff6ec4 0%,#7873f5 100%); }
+  .cover-back { background: linear-gradient(160deg,#6a63d6 0%,#d65fae 100%);
+    transform: rotateY(180deg); color: rgba(255,255,255,.85); font-size:22px; letter-spacing:2px; }
+  .cover-front .emoji { font-size:78px; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-14px);} }
+  .cover-front h2 { font-size:30px; margin-top:14px; letter-spacing:1px; text-shadow:0 2px 8px rgba(0,0,0,.25); }
+  .cover-front .tap { margin-top:22px; font-size:14px; opacity:.9; padding:8px 16px;
+    border:1px solid rgba(255,255,255,.6); border-radius:999px; animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.05);} }
+  @media (max-width:420px){ .scene{width:300px;height:410px;} }
+
+  /* ===================== GAME SCREEN ===================== */
+  #game-screen {
+    width: 100%; min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 40%, #4a2c6d 100%);
+    text-align: center; padding: 14px;
+  }
+  #game-screen h1 { font-size: 24px; margin-bottom: 4px; }
+  #game-screen .sub { font-size: 14px; color: #c9b8e0; margin-bottom: 14px; }
+
+  .meter-wrap { width: min(760px, 94vw); margin-bottom: 8px; }
+  .meter-label { display:flex; justify-content: space-between; font-size:12px; color:#c9b8e0; margin-bottom:4px; }
+  .meter { height: 12px; background: rgba(255,255,255,.15); border-radius: 999px; overflow: hidden; }
+  .meter-fill { height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg,#ffd166,#ff6ec4); transition: width .1s linear; }
+
+  #game {
+    background: #fff8e7; border: 3px solid #7873f5; border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.5); touch-action: manipulation; display: block;
+    width: min(760px, 94vw); height: clamp(150px, 34vh, 240px);
+  }
+  .controls { margin-top: 12px; font-size: 13px; color: #c9b8e0; }
+  .overlay-msg { margin-top: 10px; font-size: 15px; min-height: 22px; color: #ffd166; font-weight: 600; }
+
+  @media (max-width: 520px) {
+    #game-screen h1 { font-size: 18px; }
+    #game-screen .sub { font-size: 12px; margin-bottom: 10px; }
+    .controls { font-size: 12px; }
+    .overlay-msg { font-size: 14px; }
+  }
+
+  /* ===================== INVITE SCREEN ===================== */
+  #invite-screen {
+    position: fixed; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #fff3b0 0%, #ffd60a 55%, #ffb703 100%);
+    color: #5a3e00; text-align: center; padding: 24px; overflow: hidden;
+  }
+  #invite-screen.show { display: flex; animation: pop .6s cubic-bezier(.2,1.2,.4,1); }
+  @keyframes pop { 0% { transform: scale(.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  #mangocanvas { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+
+  .invite-card { position: relative; z-index: 3; max-width: 440px; }
+  .invite-card .dino { font-size: 56px; }
+  .invite-card .kicker { font-size: 15px; letter-spacing: 4px; text-transform: uppercase; color:#b56a00; margin-top: 4px; }
+  .invite-card h1 {
+    font-size: 58px; line-height: 1; margin: 6px 0 2px;
+    color: #c1121f; text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(0,0,0,.12);
+    letter-spacing: 1px;
+  }
+  .invite-card .name { font-size: 30px; font-weight: 800; color:#7b2cbf; margin-bottom: 14px; }
+
+  .details { display:inline-block; background: rgba(255,255,255,.55); border: 2px dashed #c1121f;
+    border-radius: 14px; padding: 16px 22px; backdrop-filter: blur(2px); }
+  .row { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; margin: 8px 0; color:#5a3e00; }
+  .row .ico { font-size: 20px; }
+  .row b { color:#3a2a00; }
+  .rsvp { margin-top: 14px; font-size: 15px; color:#7a5a00; }
+  .rsvp b { color:#c1121f; }
+
+  .again { margin-top: 18px; font-size: 13px; color:#8a6a00; cursor: pointer; text-decoration: underline; z-index: 3; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+
+  @media (max-width:520px){ .invite-card h1 { font-size: 42px; } }
+</style>
+</head>
+<body>
+  <!-- ===================== INTRO CARD ===================== -->
+  <div id="card-screen">
+    <div class="balloons" id="balloons"></div>
+    <div class="scene" id="card-scene" title="Click to open">
+      <div class="inside-card">
+        <div class="big">🦖🎮</div>
+        <h3>Get ready to play!</h3>
+        <p>Beat the Dino Dash to reveal your surprise…</p>
+      </div>
+      <div class="cover" id="card-cover">
+        <div class="cover-face cover-front">
+          <div class="emoji">🎂</div>
+          <h2>Happy Birthday!</h2>
+          <div class="tap">👆 Tap to open</div>
+        </div>
+        <div class="cover-face cover-back">✦ ✦ ✦</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GAME ===================== -->
+  <div id="game-screen" style="display:none">
+    <h1>🦖 Beat the Dino Dash to unlock your invite!</h1>
+    <div class="sub">Survive 60 seconds — it gets faster every second! 🏁</div>
+
+    <div class="meter-wrap">
+      <div class="meter-label"><span>Start</span><span id="meterpct">0%</span><span>Finish 🏁</span></div>
+      <div class="meter"><div class="meter-fill" id="meterfill"></div></div>
+    </div>
+
+    <canvas id="game" width="760" height="240"></canvas>
+    <div class="overlay-msg" id="msg">Press SPACE / tap to jump</div>
+    <div class="controls">Space · ↑ · or tap the game to jump</div>
+  </div>
+
+  <!-- ===================== INVITE ===================== -->
+  <div id="invite-screen">
+    <canvas id="mangocanvas"></canvas>
+    <canvas id="confetti"></canvas>
+    <div class="invite-card">
+      <div class="dino">🦖🎉</div>
+      <div class="kicker" id="kicker">You Win — You're Invited!</div>
+      <h1>You're<br>Invited!</h1>
+      <!-- ===== EDIT NAME / DETAILS ===== -->
+      <div class="name">Vivaan's Birthday Bash 🥭</div>
+      <div class="details">
+        <div class="row"><span class="ico">📅</span> <b>Tuesday, June 30, 2026</b></div>
+        <div class="row"><span class="ico">🕔</span> <b>5:00 PM onwards</b></div>
+        <div class="row"><span class="ico">📍</span> <b>Funky Monkey, Galleria Mall</b></div>
+        <div class="rsvp">RSVP: <b>+91 97395 59994</b></div>
+      </div>
+    </div>
+    <div class="again" id="again">↻ Play again</div>
+  </div>
+
+<script>
+/* ============================================================
+   DINO DASH — reach the finish to unlock the invite
+   ============================================================ */
+const cv = document.getElementById('game');
+const g = cv.getContext('2d');
+let W = cv.width, H = cv.height, GROUND = H - 40;
+
+/* size the canvas world to match how big it's actually drawn on screen
+   (crisp on high-DPI phones, and the game adapts to portrait/landscape) */
+function fitCanvas() {
+  const rect = cv.getBoundingClientRect();
+  if (!rect.width) return;                 // skip while hidden (display:none)
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width  = Math.round(rect.width  * dpr);
+  cv.height = Math.round(rect.height * dpr);
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);    // draw in CSS pixels
+  W = rect.width; H = rect.height; GROUND = H - 28;
+  if (dino) { if (dino.onGround) dino.y = GROUND; else dino.y = Math.min(dino.y, GROUND); }
+  if (obstacles) obstacles.forEach(o => o.y = GROUND);
+}
+
+const GAME_TIME = 60;            // seconds to survive to "win"
+const BASE_SPEED = 5;
+const SPEED_PER_SEC = 0.35;      // dino gets this much faster every second
+let dino, obstacles, dist, speed, gravity, running, won, spawnTimer;
+let startTime, elapsed, lastSpeedSec, finaleSpawned;
+const FINALE_AT = 55;            // seconds — when the 6 giant cacti appear
+const MAX_ATTEMPTS = 5;          // tries before "invited anyway"
+let attemptsLeft, gameWon;
+
+function reset() {
+  dino = { x: 60, y: GROUND, w: 30, h: 34, vy: 0, onGround: true };
+  obstacles = [];
+  dist = 0; speed = BASE_SPEED; gravity = 0.7;
+  running = true; won = false; spawnTimer = 60;
+  startTime = null; elapsed = 0; lastSpeedSec = 0; finaleSpawned = false;
+  msg.textContent = `Survive 60 seconds! 🏃  (${attemptsLeft} ${attemptsLeft===1?'try':'tries'} left)`;
+}
+
+function jump() {
+  if (won) return;
+  if (!running) { reset(); loop(); return; }   // restart after game over
+  if (dino.onGround) { dino.vy = -13; dino.onGround = false; }
+}
+
+function spawnObstacle() {
+  const cluster = Math.random() < 0.45 ? 2 : 1;   // sometimes DOUBLE cacti
+  let x = W + 10;
+  for (let i = 0; i < cluster; i++) {
+    const tall = Math.random() < 0.3;
+    const w = 18 + Math.random()*14;
+    const h = tall ? 46 : 30;
+    obstacles.push({ x, y: GROUND, w, h, emoji: '🌵' });
+    x += w + 4;                                    // place the next cactus right beside it
+  }
+}
+
+/* the grand finale: 6 GIANT cacti in a row for the last jump */
+function spawnFinale() {
+  let x = W + 30;
+  for (let i = 0; i < 6; i++) {
+    const w = 30, h = 54;
+    obstacles.push({ x, y: GROUND, w, h, emoji: '🌵', big: true });
+    x += w + 6;
+  }
+  msg.textContent = "🌵 FINAL JUMP — 6 GIANT cacti! JUMP! 🌵";
+}
+
+function hit(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y - a.h < b.y && a.y > b.y - b.h;
+}
+
+const msg = document.getElementById('msg');
+const meterFill = document.getElementById('meterfill');
+const meterPct = document.getElementById('meterpct');
+
+function draw() {
+  g.clearRect(0,0,W,H);
+
+  // ground
+  g.strokeStyle = '#caa86a'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(0, GROUND+2); g.lineTo(W, GROUND+2); g.stroke();
+
+  // dino (flipped horizontally so it faces forward / the way it's running)
+  g.font = '30px serif'; g.textBaseline = 'alphabetic';
+  g.save();
+  g.translate(dino.x + dino.w/2, dino.y + 4);
+  g.scale(-1, 1);
+  g.fillText('🦖', -dino.w/2 - 2, 0);
+  g.restore();
+
+  // obstacles
+  obstacles.forEach(o => {
+    g.font = (o.big ? '50px' : o.h > 40 ? '40px' : '28px') + ' serif';
+    g.fillText(o.emoji, o.x, o.y + 4);
+  });
+}
+
+function loop() {
+  if (!running) return;
+
+  // physics
+  dino.vy += gravity;
+  dino.y += dino.vy;
+  if (dino.y >= GROUND) { dino.y = GROUND; dino.vy = 0; dino.onGround = true; }
+
+  // spawn (normal cacti stop once the finale has appeared)
+  spawnTimer--;
+  if (spawnTimer <= 0 && !finaleSpawned && elapsed < FINALE_AT - 1) {
+    spawnObstacle();
+    spawnTimer = Math.max(38, 92 - elapsed*0.9) + Math.random()*30;
+  }
+
+  // move obstacles
+  obstacles.forEach(o => o.x -= speed);
+  obstacles = obstacles.filter(o => o.x > -60);
+
+  // collision
+  const dbox = { x: dino.x+4, y: dino.y, w: dino.w-8, h: dino.h };
+  for (const o of obstacles) {
+    const obox = { x: o.x+4, y: o.y, w: o.w-8, h: o.h };
+    if (hit(dbox, obox)) {
+      running = false;
+      attemptsLeft--;
+      if (attemptsLeft <= 0) {
+        won = true; gameWon = false;            // out of tries — invited anyway
+        msg.textContent = "Out of tries — but you're invited anyway! 🎉";
+        draw();
+        setTimeout(showInvite, 800);
+      } else {
+        msg.textContent = `💥 Ouch! ${attemptsLeft} ${attemptsLeft===1?'try':'tries'} left — tap to retry`;
+        draw();
+      }
+      return;
+    }
+  }
+
+  // time + speed ramp (a bit faster every second)
+  const now = performance.now();
+  if (startTime === null) startTime = now;
+  elapsed = (now - startTime) / 1000;
+  const sec = Math.floor(elapsed);
+  if (sec > lastSpeedSec) { lastSpeedSec = sec; speed = BASE_SPEED + sec * SPEED_PER_SEC; }
+
+  // grand finale: the 6 giant cacti
+  if (!finaleSpawned && elapsed >= FINALE_AT) { finaleSpawned = true; spawnFinale(); }
+
+  const pct = Math.min(100, (elapsed / GAME_TIME) * 100);
+  meterFill.style.width = pct + '%';
+  meterPct.textContent = Math.max(0, Math.ceil(GAME_TIME - elapsed)) + 's left';
+
+  if (elapsed >= GAME_TIME) { win(); return; }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function win() {
+  running = false; won = true; gameWon = true;
+  meterFill.style.width = '100%'; meterPct.textContent = '0s left';
+  msg.textContent = "🏁 You made it! 🎉";
+  setTimeout(showInvite, 500);
+}
+
+/* controls */
+function onJump(e){ e.preventDefault(); jump(); }
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'ArrowUp') onJump(e);
+});
+cv.addEventListener('mousedown', onJump);
+cv.addEventListener('touchstart', onJump, { passive:false });
+
+/* ============================================================
+   INVITE SCREEN — yellow + mango rain + confetti
+   ============================================================ */
+const inviteScreen = document.getElementById('invite-screen');
+const gameScreen = document.getElementById('game-screen');
+
+/* ---------- bouncy mango physics + hungry monkeys ---------- */
+const mc = document.getElementById('mangocanvas');
+const mg = mc.getContext('2d');
+let MW, MH, mangoes, monkeys, mangoRAF = null, mangoSpawnT, mangoRunning = false, ate = 0;
+
+function mcsize(){ MW = mc.width = innerWidth; MH = mc.height = innerHeight; }
+
+function startMangoSim(){
+  mcsize();
+  mangoes = []; monkeys = []; mangoSpawnT = 0; ate = 0;
+  const n = 3;                                  // number of hungry monkeys
+  for (let i = 0; i < n; i++)
+    monkeys.push({ x: (i+1)*MW/(n+1), face: 1, target: null, chomp: 0 });
+  mangoRunning = true;
+  if (mangoRAF) cancelAnimationFrame(mangoRAF);
+  mangoLoop();
+}
+
+function stopMangoSim(){
+  mangoRunning = false;
+  if (mangoRAF) cancelAnimationFrame(mangoRAF);
+  if (mg) mg.clearRect(0,0,MW,MH);
+}
+
+function spawnMango(){
+  if (mangoes.length > 110) return;             // cap so it stays smooth
+  const r = 15 + Math.random()*9;
+  mangoes.push({
+    x: 40 + Math.random()*(MW-80), y: -30,
+    vx: (Math.random()-.5)*2.5, vy: 1 + Math.random()*2,
+    r, rot: Math.random()*6.28, vr: (Math.random()-.5)*0.25, leaf: Math.random()<0.15
+  });
+}
+
+function mangoLoop(){
+  if (!mangoRunning) return;
+  mg.clearRect(0,0,MW,MH);
+
+  mangoSpawnT--;
+  if (mangoSpawnT <= 0){ spawnMango(); mangoSpawnT = 6; }   // steady rain → fills up
+
+  const floor = MH - 6, G = 0.5, REST = 0.6;    // REST = bounciness
+
+  // gravity + walls + bouncy floor
+  for (const m of mangoes){
+    m.vy += G; m.x += m.vx; m.y += m.vy; m.rot += m.vr;
+    if (m.x < m.r){ m.x = m.r; m.vx *= -0.6; }
+    if (m.x > MW-m.r){ m.x = MW-m.r; m.vx *= -0.6; }
+    if (m.y > floor - m.r){
+      m.y = floor - m.r;
+      if (Math.abs(m.vy) > 1.3){ m.vy *= -REST; m.vx *= 0.86; m.vr *= 0.7; }
+      else { m.vy = 0; m.vx *= 0.8; }
+    }
+  }
+
+  // pairwise collisions so they stack and pile up
+  for (let i = 0; i < mangoes.length; i++){
+    for (let j = i+1; j < mangoes.length; j++){
+      const a = mangoes[i], b = mangoes[j];
+      const dx = b.x-a.x, dy = b.y-a.y, d = Math.hypot(dx,dy) || 0.001, min = a.r+b.r;
+      if (d < min){
+        const o = (min-d)/2, nx = dx/d, ny = dy/d;
+        a.x -= nx*o; a.y -= ny*o; b.x += nx*o; b.y += ny*o;
+        const p = (b.vx-a.vx)*nx + (b.vy-a.vy)*ny;
+        if (p < 0){
+          a.vx += p*nx*0.7; a.vy += p*ny*0.7;
+          b.vx -= p*nx*0.7; b.vy -= p*ny*0.7;
+        }
+      }
+    }
+  }
+
+  // monkeys hunt the nearest mango and eat it
+  for (const k of monkeys){
+    if (!k.target || mangoes.indexOf(k.target) < 0){
+      let best = null, bd = 1e9;
+      for (const m of mangoes){ const dd = Math.abs(m.x-k.x); if (dd < bd){ bd = dd; best = m; } }
+      k.target = best;
+    }
+    if (k.target){
+      const dx = k.target.x - k.x;
+      k.face = dx < 0 ? -1 : 1;
+      k.x += Math.sign(dx) * Math.min(3.4, Math.abs(dx));
+      if (Math.abs(dx) < 28 && k.target.y > floor - 70){
+        const idx = mangoes.indexOf(k.target);
+        if (idx >= 0){ mangoes.splice(idx,1); ate++; k.chomp = 8; }
+        k.target = null;
+      }
+    }
+    if (k.chomp > 0) k.chomp--;
+  }
+
+  // draw mangoes
+  for (const m of mangoes){
+    mg.save(); mg.translate(m.x, m.y); mg.rotate(m.rot);
+    mg.font = (m.r*2)+'px serif'; mg.textAlign = 'center'; mg.textBaseline = 'middle';
+    mg.fillText(m.leaf ? '🌿' : '🥭', 0, 0); mg.restore();
+  }
+  // draw monkeys (bob a little while chomping)
+  for (const k of monkeys){
+    mg.save();
+    mg.translate(k.x, floor - 20 - (k.chomp > 0 ? 5 : 0));
+    mg.scale(k.face, 1);
+    mg.font = '42px serif'; mg.textAlign = 'center'; mg.textBaseline = 'middle';
+    mg.fillText(k.chomp > 0 ? '🙊' : '🐒', 0, 0);
+    mg.restore();
+  }
+
+  mangoRAF = requestAnimationFrame(mangoLoop);
+}
+addEventListener('resize', () => { if (mangoRunning) mcsize(); });
+
+function showInvite() {
+  document.getElementById('kicker').textContent =
+    gameWon ? "You Win — You're Invited!" : "Nice try — You're Invited Anyway! 🎉";
+  gameScreen.style.display = 'none';
+  inviteScreen.classList.add('show');
+  startMangoSim();
+  startConfetti();
+  chime();
+}
+
+document.getElementById('again').addEventListener('click', () => {
+  inviteScreen.classList.remove('show');
+  stopMangoSim();
+  gameScreen.style.display = 'flex';
+  fitCanvas();
+  attemptsLeft = MAX_ATTEMPTS;
+  reset(); loop();
+});
+
+/* ---------- confetti on the invite screen ---------- */
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+let CW, CH, pieces = [];
+function csize(){ CW = canvas.width = innerWidth; CH = canvas.height = innerHeight; }
+csize(); addEventListener('resize', csize);
+function burst(n) {
+  const colors = ['#ff6ec4','#7873f5','#c1121f','#ffd166','#06d6a0','#fb8500','#fff'];
+  for (let i = 0; i < n; i++) pieces.push({
+    x: CW/2 + (Math.random()-.5)*160, y: CH/3,
+    vx: (Math.random()-.5)*12, vy: -Math.random()*13 - 3,
+    gr: 0.3 + Math.random()*0.2, size: 5 + Math.random()*7,
+    color: colors[(Math.random()*colors.length)|0],
+    rot: Math.random()*6.28, vr: (Math.random()-.5)*0.4, life: 140 + Math.random()*60
+  });
+}
+let confettiOn = false;
+function startConfetti(){ confettiOn = true; burst(180); setTimeout(()=>burst(140),400); setTimeout(()=>burst(140),900); }
+function ctick() {
+  ctx.clearRect(0,0,CW,CH);
+  if (confettiOn) pieces.forEach(p => {
+    p.vy += p.gr; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+    ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6); ctx.restore();
+  });
+  pieces = pieces.filter(p => p.life > 0 && p.y < CH + 40);
+  requestAnimationFrame(ctick);
+}
+ctick();
+
+/* ---------- celebratory chime ---------- */
+function chime() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+      const o = ac.createOscillator(), gn = ac.createGain();
+      o.type = 'triangle'; o.frequency.value = f; o.connect(gn); gn.connect(ac.destination);
+      const t = ac.currentTime + i*0.16;
+      gn.gain.setValueAtTime(0, t);
+      gn.gain.linearRampToValueAtTime(0.25, t+0.02);
+      gn.gain.exponentialRampToValueAtTime(0.001, t+0.5);
+      o.start(t); o.stop(t+0.5);
+    });
+  } catch(e){}
+}
+
+/* ============================================================
+   INTRO CARD — flip open, then start the game
+   ============================================================ */
+function startGame() {
+  gameScreen.style.display = 'flex';
+  fitCanvas();              // now that it's visible, size the world to the screen
+  attemptsLeft = MAX_ATTEMPTS;
+  reset(); draw(); loop();
+}
+
+/* keep the canvas sized correctly on rotate / resize */
+let resizeT;
+function onResize() {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => { if (gameScreen.style.display !== 'none') { fitCanvas(); draw(); } }, 120);
+}
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', onResize);
+
+/* floating balloons on the intro card */
+(function () {
+  const colors = ['#ff6ec4','#7873f5','#42e695','#ffd166','#06d6a0','#ef476f'];
+  const box = document.getElementById('balloons');
+  for (let i = 0; i < 14; i++) {
+    const b = document.createElement('div');
+    b.className = 'balloon';
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.background = colors[i % colors.length];
+    b.style.animationDuration = (8 + Math.random()*8) + 's';
+    b.style.animationDelay = (Math.random()*8) + 's';
+    b.style.transform = `scale(${0.6 + Math.random()*0.8})`;
+    box.appendChild(b);
+  }
+})();
+
+const cardScreen = document.getElementById('card-screen');
+const cardScene = document.getElementById('card-scene');
+let cardOpened = false;
+document.getElementById('card-cover').addEventListener('click', () => {
+  if (cardOpened) return;
+  cardOpened = true;
+  cardScene.classList.add('open');     // flip the card open
+  chime();
+  setTimeout(() => {                    // after the flip, launch the game
+    cardScreen.style.display = 'none';
+    startGame();
+  }, 1300);
+});
+</script>
+</body>
+</html>
