@@ -275,15 +275,15 @@ function spawnObstacle() {
   }
 }
 
-/* the grand finale: 6 GIANT cacti in a row for the last jump */
+/* the grand finale: 8 GIANT cacti in a row for the last jump */
 function spawnFinale() {
   let x = W + 30;
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 8; i++) {
     const w = 30, h = 54;
     obstacles.push({ x, y: GROUND, w, h, emoji: '🌵', big: true });
     x += w + 6;
   }
-  msg.textContent = "🌵 FINAL JUMP — 6 GIANT cacti! JUMP! 🌵";
+  msg.textContent = "🌵 FINAL JUMP — 8 GIANT cacti! JUMP! 🌵";
 }
 
 function hit(a, b) {
